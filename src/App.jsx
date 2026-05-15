@@ -1,21 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 const PLACEHOLDER_TEXT = "ここに文字が表示されます";
+const APP_FONT = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif";
 
-const FONT_OPTIONS = [
-  { label: "System UI", value: "system-ui, sans-serif" },
-  { label: "Apple System", value: "-apple-system, BlinkMacSystemFont, sans-serif" },
-  { label: "Segoe UI", value: "'Segoe UI', sans-serif" },
-  { label: "Noto Sans JP", value: "'Noto Sans JP', sans-serif" },
-  { label: "Hiragino Sans", value: "'Hiragino Sans', sans-serif" },
-  { label: "Yu Gothic", value: "'Yu Gothic', sans-serif" },
-  { label: "Meiryo", value: "Meiryo, sans-serif" },
-  { label: "Arial", value: "Arial, sans-serif" },
-  { label: "Helvetica", value: "Helvetica, Arial, sans-serif" },
-  { label: "Serif", value: "serif" },
-  { label: "Monospace", value: "monospace" },
-];
+const menuMotion = {
+  initial: { opacity: 0, y: 10, scale: 0.985, filter: "blur(2px)" },
+  animate: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+  exit: { opacity: 0, y: 8, scale: 0.985, filter: "blur(2px)" },
+  transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
+};
 
 const MODES = {
   standard: {
@@ -49,7 +43,7 @@ const styles = {
     overflow: "hidden",
     background: "#ffffff",
     color: "#09090b",
-    fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily: APP_FONT,
   },
   displaySurface: {
     minHeight: "100vh",
@@ -57,7 +51,6 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     padding: "96px 64px 176px",
-    background: "#ffffff",
     boxSizing: "border-box",
   },
   displayText: {
@@ -124,25 +117,26 @@ const styles = {
     zIndex: 30,
     width: 320,
     marginTop: 16,
-    padding: 16,
+    padding: 14,
     border: "1px solid #e4e4e7",
-    borderRadius: 24,
+    borderRadius: 20,
     background: "#ffffff",
     color: "#18181b",
     boxShadow: "0 24px 60px rgba(0, 0, 0, 0.16)",
     boxSizing: "border-box",
+    transformOrigin: "top right",
   },
   modeList: {
     display: "grid",
-    gap: 8,
+    gap: 9,
   },
   modeButton: {
     width: "100%",
-    padding: "12px 14px",
-    borderRadius: 18,
+    padding: "13px 15px",
+    borderRadius: 14,
     textAlign: "left",
     cursor: "pointer",
-    transition: "background 0.15s ease, border-color 0.15s ease",
+    transition: "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
   },
   modeButtonTitle: {
     display: "flex",
@@ -171,16 +165,17 @@ const styles = {
     gridTemplateColumns: "repeat(3, 1fr)",
     gap: 8,
   },
-  select: {
-    width: "100%",
-    padding: "12px 12px",
-    border: "1px solid #e4e4e7",
-    borderRadius: 16,
-    background: "#fafafa",
-    color: "#18181b",
+  alignButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 40,
+    padding: "0 12px",
+    borderRadius: 12,
     fontSize: 14,
-    outline: "none",
-    boxSizing: "border-box",
+    fontWeight: 500,
+    cursor: "pointer",
   },
   inputPanel: {
     position: "fixed",
@@ -192,7 +187,7 @@ const styles = {
     margin: "0 auto",
     padding: 12,
     border: "1px solid #e4e4e7",
-    borderRadius: 32,
+    borderRadius: 22,
     background: "rgba(255, 255, 255, 0.92)",
     boxShadow: "0 18px 50px rgba(0, 0, 0, 0.12)",
     backdropFilter: "blur(12px)",
@@ -240,7 +235,7 @@ const styles = {
     resize: "none",
     padding: "13px 16px",
     border: "1px solid #e4e4e7",
-    borderRadius: 22,
+    borderRadius: 14,
     background: "#fafafa",
     color: "#18181b",
     fontSize: 16,
@@ -252,7 +247,17 @@ const styles = {
 
 function IconBase({ children, size = 18 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       {children}
     </svg>
   );
@@ -346,24 +351,32 @@ function calculateFontSize(text) {
 
 function MenuPanel({ children }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.15, ease: "easeOut" }} style={styles.menuPanel}>
+    <motion.div {...menuMotion} style={styles.menuPanel}>
       {children}
     </motion.div>
   );
 }
 
-function DisplaySurface({ visibleText, fontSize, align, fontFamily }) {
+function DisplaySurface({ visibleText, fontSize, align }) {
   return (
     <section style={styles.displaySurface}>
-      <motion.div
-        key={`${visibleText}-${fontSize}-${align}-${fontFamily}`}
-        initial={{ opacity: 0.9, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.15 }}
-        style={{ ...styles.displayText, textAlign: align, fontFamily, fontSize }}
-      >
-        {visibleText}
-      </motion.div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${visibleText}-${fontSize}-${align}`}
+          initial={{ opacity: 0, y: 8, scale: 0.995 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -6, scale: 0.995 }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            ...styles.displayText,
+            textAlign: align,
+            fontFamily: APP_FONT,
+            fontSize,
+          }}
+        >
+          {visibleText}
+        </motion.div>
+      </AnimatePresence>
     </section>
   );
 }
@@ -374,7 +387,6 @@ export default function BeThereApp() {
   const [pendingDraft, setPendingDraft] = useState(null);
   const [display, setDisplay] = useState(PLACEHOLDER_TEXT);
   const [align, setAlign] = useState("center");
-  const [fontFamily, setFontFamily] = useState(FONT_OPTIONS[0].value);
   const [openMenu, setOpenMenu] = useState(null);
 
   const normalizedDraft = draft.trim() ? draft : PLACEHOLDER_TEXT;
@@ -464,46 +476,67 @@ export default function BeThereApp() {
           font: inherit;
         }
       `}</style>
-      <DisplaySurface visibleText={visibleText} fontSize={fontSize} align={align} fontFamily={fontFamily} />
+
+      <DisplaySurface visibleText={visibleText} fontSize={fontSize} align={align} />
 
       <header style={styles.header}>
         <h1 style={styles.title}>Be there</h1>
 
         <div style={styles.controls}>
           <div style={styles.controlWrap}>
-            <button type="button" onClick={() => toggleMenu("mode")} style={styles.topButton}>
+            <motion.button
+              type="button"
+              onClick={() => toggleMenu("mode")}
+              style={styles.topButton}
+              key={mode}
+              initial={{ opacity: 0.75, y: 2 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            >
               <ActiveIcon />
               <span>{MODES[mode].label}</span>
-            </button>
-            {openMenu === "mode" && (
-              <MenuPanel>
-                <div style={styles.modeList}>
-                  {Object.entries(MODES).map(([key, item]) => {
-                    const Icon = item.icon;
-                    const selected = mode === key;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => handleModeChange(key)}
-                        style={{
-                          ...styles.modeButton,
-                          border: selected ? "1px solid #18181b" : "1px solid #e4e4e7",
-                          background: selected ? "#18181b" : "#fafafa",
-                          color: selected ? "#ffffff" : "#18181b",
-                        }}
-                      >
-                        <span style={styles.modeButtonTitle}>
-                          <Icon />
-                          {item.label}
-                        </span>
-                        <span style={{ ...styles.modeDescription, color: selected ? "#d4d4d8" : "#71717a" }}>{item.description}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </MenuPanel>
-            )}
+            </motion.button>
+
+            <AnimatePresence>
+              {openMenu === "mode" && (
+                <MenuPanel>
+                  <div style={styles.modeList}>
+                    {Object.entries(MODES).map(([key, item]) => {
+                      const Icon = item.icon;
+                      const selected = mode === key;
+                      return (
+                        <motion.button
+                          key={key}
+                          type="button"
+                          onClick={() => handleModeChange(key)}
+                          whileTap={{ scale: 0.985 }}
+                          transition={{ duration: 0.14 }}
+                          style={{
+                            ...styles.modeButton,
+                            border: selected ? "1px solid #18181b" : "1px solid #e4e4e7",
+                            background: selected ? "#18181b" : "#fafafa",
+                            color: selected ? "#ffffff" : "#18181b",
+                          }}
+                        >
+                          <span style={styles.modeButtonTitle}>
+                            <Icon />
+                            {item.label}
+                          </span>
+                          <span
+                            style={{
+                              ...styles.modeDescription,
+                              color: selected ? "#d4d4d8" : "#71717a",
+                            }}
+                          >
+                            {item.description}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </MenuPanel>
+              )}
+            </AnimatePresence>
           </div>
 
           <div style={styles.controlWrap}>
@@ -511,23 +544,24 @@ export default function BeThereApp() {
               <SettingsIcon />
               <span>表示設定</span>
             </button>
-            {openMenu === "settings" && (
-              <MenuPanel>
-                <div style={{ display: "grid", gap: 20 }}>
+
+            <AnimatePresence>
+              {openMenu === "settings" && (
+                <MenuPanel>
                   <div style={styles.fieldGroup}>
                     <label style={styles.fieldLabel}>文字揃え</label>
                     <div style={styles.alignmentGrid}>
                       {ALIGNMENTS.map(({ value, label, icon: Icon }) => {
                         const selected = align === value;
                         return (
-                          <button
+                          <motion.button
                             key={value}
                             type="button"
                             onClick={() => setAlign(value)}
+                            whileTap={{ scale: 0.985 }}
+                            transition={{ duration: 0.14 }}
                             style={{
-                              ...styles.topButton,
-                              width: "100%",
-                              borderRadius: 16,
+                              ...styles.alignButton,
                               background: selected ? "#18181b" : "#fafafa",
                               color: selected ? "#ffffff" : "#3f3f46",
                               border: selected ? "1px solid #18181b" : "1px solid #e4e4e7",
@@ -535,25 +569,14 @@ export default function BeThereApp() {
                           >
                             <Icon />
                             {label}
-                          </button>
+                          </motion.button>
                         );
                       })}
                     </div>
                   </div>
-
-                  <div style={styles.fieldGroup}>
-                    <label style={styles.fieldLabel}>フォント</label>
-                    <select value={fontFamily} onChange={(event) => setFontFamily(event.target.value)} style={styles.select}>
-                      {FONT_OPTIONS.map((font) => (
-                        <option key={font.value} value={font.value}>
-                          {font.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </MenuPanel>
-            )}
+                </MenuPanel>
+              )}
+            </AnimatePresence>
           </div>
 
           <button type="button" onClick={resetAll} style={styles.topButton}>
@@ -572,7 +595,13 @@ export default function BeThereApp() {
           <p style={styles.privacyText}>Be there上で入力された内容が、無断で収集されたり、送信されることは一切ありません。</p>
         </div>
 
-        <textarea value={draft} onChange={handleDraftChange} onKeyDown={handleKeyDown} placeholder="ここに伝えたいことを入力" style={{ ...styles.textarea, fontFamily }} />
+        <textarea
+          value={draft}
+          onChange={handleDraftChange}
+          onKeyDown={handleKeyDown}
+          placeholder="ここに伝えたいことを入力"
+          style={{ ...styles.textarea, fontFamily: APP_FONT }}
+        />
       </section>
     </main>
   );
