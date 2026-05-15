@@ -357,26 +357,23 @@ function MenuPanel({ children }) {
   );
 }
 
-function DisplaySurface({ visibleText, fontSize, align }) {
+function DisplaySurface({ visibleText, fontSize, align, animationKey }) {
   return (
     <section style={styles.displaySurface}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${visibleText}-${fontSize}-${align}`}
-          initial={{ opacity: 0, y: 8, scale: 0.995 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -6, scale: 0.995 }}
-          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            ...styles.displayText,
-            textAlign: align,
-            fontFamily: APP_FONT,
-            fontSize,
-          }}
-        >
-          {visibleText}
-        </motion.div>
-      </AnimatePresence>
+      <motion.div
+        key={animationKey}
+        initial={{ opacity: 0.96, y: 4, scale: 0.998 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          ...styles.displayText,
+          textAlign: align,
+          fontFamily: APP_FONT,
+          fontSize,
+        }}
+      >
+        {visibleText}
+      </motion.div>
     </section>
   );
 }
@@ -477,7 +474,7 @@ export default function BeThereApp() {
         }
       `}</style>
 
-      <DisplaySurface visibleText={visibleText} fontSize={fontSize} align={align} />
+      <DisplaySurface visibleText={visibleText} fontSize={fontSize} align={align} animationKey={`${mode}-${align}`} />
 
       <header style={styles.header}>
         <h1 style={styles.title}>Be there</h1>
